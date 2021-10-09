@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Visualizing Pneumonia</h1>
+<h4>アプリケーション概要: ユーザーから送信されたDICOM画像からJPG画像を作成し、保存します。</h4>
+<form enctype="multipart/form-data">
+  <input type="file" name="input_img">
+  <p>メモ: <input type="text" name="input_text"></p>
+  <button type="submit" formmethod="post">登録&診断！</button></p>
+  {% if img_path%}
+  <p>登録された画像とメモ: {{ output_text }}</p>
+  <div>
+    <img src="{{ img_path }}" style="width: 800px;">
+  </div>
+  {% endif %}
+</form>
+
+{% endblock %}
