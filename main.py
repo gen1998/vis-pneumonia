@@ -42,6 +42,16 @@ def post_dicom():
         f.write(text)  # 何も書き込まなくてファイルは作成されました
         f.close()
     return render_template("index.html", output_text=text, img_path=img_path)
-        
+
+
+@app.route('/viewer')
+def viewer():
+    dcm_dir = "static/dcms/"
+    dicom_path = dcm_dir + "test.dcm"
+    return render_template("viewer.html", dicom_path=dicom_path)
+
+
+
+
 if __name__ == "__main__":
     app.run(debug=True)
