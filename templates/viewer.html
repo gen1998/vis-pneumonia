@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<body class="vsc-initialized" data-new-gr-c-s-check-loaded="14.1032.0" data-gr-ext-installed="">
+<div class="container">
+
+ 
+    <h4>テスト</h4>
+
+    <br>
+    <br>
+
+    <!-- note we disable selection on the top most div -->
+    <div style="width:512px;height:512px;position:relative;color:white" oncontextmenu="return false" onmousedown="return false">
+
+        <div id="dicomImage" style="width:512px;height:512px;top:0px;left:0px;position:absolute">
+        <canvas class="cornerstone-canvas" width="512" style="display: block; width: 512px; height: 512px;" height="512"></canvas></div>
+
+        <div id="topleft" class="overlay" style="position:absolute;top:0px;left:0px">
+            Patient Name
+        </div>
+        <div id="topright" class="overlay" style="position:absolute;top:0px;right:0px">
+            Hospital
+        </div>
+        <div id="bottomright" class="overlay" style="position:absolute;bottom:0px;right:0px">Zoom: 2x</div>
+        <div id="bottomleft" class="overlay" style="position:absolute;bottom:0px;left:0px">WW/WC:272/124</div>
+    </div>
+
+</div>
+
+
+<!-- include the cornerstone library -->
+<script src="./static/viewer/cornerstone.js"></script>
+<script>window.cornerstone || document.write('<script src="https://unpkg.com/cornerstone-core">\x3C/script>')</script><script src="./static/viewer/cornerstone-core"></script>
+
+<!-- include special code for these examples which provides images -->
+<script src="./static/viewer/exampleImageIdLoader.js"></script>
+
+<script>
+    // image enable the element
+    const element = document.getElementById('dicomImage');
+    cornerstone.enable(element);
+
+    // load the image and display it
+    const imageId = 'example://1';
+    cornerstone.loadImage(imageId).then(function(image) {
+        cornerstone.displayImage(element, image);
+        const viewport = cornerstone.getViewport(element);
+        document.getElementById('bottomright').textContent = "Zoom: " + viewport.scale + "x";
+        document.getElementById('bottomleft').textContent = "WW/WC:" + Math.round(viewport.voi.windowWidth)
+            + "/" + Math.round(viewport.voi.windowCenter);
+    });
+
+    // add event handlers to mouse move to adjust window/center
+    element.addEventListener('mousedown', function (e) {
+        let lastX = e.pageX;
+        let lastY = e.pageY;
+
+        function mouseMoveHandler(e) {
+            const deltaX = e.pageX - lastX;
+            const deltaY = e.pageY - lastY;
+            lastX = e.pageX;
+            lastY = e.pageY;
+
+            let viewport = cornerstone.getViewport(element);
+            viewport.voi.windowWidth += (deltaX / viewport.scale);
+            viewport.voi.windowCenter += (deltaY / viewport.scale);
+            cornerstone.setViewport(element, viewport);
+
+            document.getElementById('bottomleft').textContent = "WW/WC:" + Math.round(viewport.voi.windowWidth)
+                + "/" + Math.round(viewport.voi.windowCenter);
+        }
+
+        function mouseUpHandler() {
+            document.removeEventListener('mousemove', mouseMoveHandler);
+            document.removeEventListener('mouseup', mouseUpHandler);
+        }
+
+        document.addEventListener('mousemove', mouseMoveHandler);
+        document.addEventListener('mouseup', mouseUpHandler);
+    });
+
+
+</script>
+{% endblock %}
