@@ -2,17 +2,20 @@
 
 {% block content %}
 
-<h4>アプリケーション概要: ユーザーから送信されたDICOM画像からJPG画像を作成し、保存します。</h4>
-<form enctype="multipart/form-data">
+
+
+<h3>アプリケーション概要: ユーザーから送信されたDICOM画像からJPG画像を作成し、保存します。<br></h4>
+<form enctype="multipart/form-data" action="{{ url_for('post') }}" method="post">
+  <h4>Step 1: DICOM画像を選択してください。</h4>
   <input type="file" name="input_img">
-  <p>メモ: <input type="text" name="input_text"></p>
+  <h4>Step2: 画像のタイトルを入力してください。</h4>
+  <p>タイトル: <input type="text" name="input_title"></p>
+  <h4>Step3: 画像について、特記事項やメモを入力してください。</h4>
+  <p>メモ: <input type="text" name="input_memo"></p>
+  <h4>Step4: データを送信してください。</h4>
   <button type="submit" formmethod="post">登録&診断！</button></p>
-  {% if img_path%}
-  <p>登録された画像とメモ: {{ output_text }}</p>
-  <div>
-    <img src="{{ img_path }}" style="width: 800px;">
-  </div>
-  {% endif %}
 </form>
+
+
 
 {% endblock %}

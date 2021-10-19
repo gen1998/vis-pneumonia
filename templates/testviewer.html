@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!--  これを参考にする  https://qiita.com/furi/items/a32c106e9d7c4418fc9d  -->
+
+<h3>アプリケーション概要: ユーザーから送信されたDICOM画像からJPG画像を作成し、保存します。<br></h3>
+
+<h2>登録情報</h2>
+
+<h3>日時: {{ dt_now }}</h3>
+<h3>タイトル: {{ output_title }}</h3>
+<h3>メモ: {{ output_memo }}<br><br></h3>
+<h3>診断結果: <button type=“button” onclick="location.href='{{url_for('index')}}'">訂正・フィードバック</button><button type=“button” onclick="location.href='{{url_for('index')}}'">データベースへ移動</button></h3>
+<div>
+  <img src="{{ img_path }}" style="width: 800px;">
+</div>
+
+
+{% endblock %}
