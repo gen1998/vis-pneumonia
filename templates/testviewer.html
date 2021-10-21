@@ -2,19 +2,43 @@
 
 {% block content %}
 
-<!--  これを参考にする  https://qiita.com/furi/items/a32c106e9d7c4418fc9d  -->
+<br>
+<br>
+<h3>登録情報</h3>
+<br>
+<h2 id=left>日時: {{ dt_now_readable }}</h2>
+<h2 id=left>タイトル: {{ output_title }}</h2>
+<h2 id=left>メモ: {{ output_memo }}<br><br></h2>
 
-<h3>アプリケーション概要: ユーザーから送信されたDICOM画像からJPG画像を作成し、保存します。<br></h3>
+<h3>診断結果: 
+  <button type=“button” onclick="location.href='{{url_for('annotation')}}'">訂正・フィードバック</button>
+  <button type=“button” onclick="location.href='{{url_for('results')}}'">終了(データベースへ移動)</button>
+</h3>
 
-<h2>登録情報</h2>
+<h3>※ 画像をクリックすると診断前の画像と切り替えできます。</h3>
+<img id="img_array" onclick="changeIMG()" src="{{ anno_path }}" style="width: 800px;display: block; margin: auto;">
 
-<h3>日時: {{ dt_now }}</h3>
-<h3>タイトル: {{ output_title }}</h3>
-<h3>メモ: {{ output_memo }}<br><br></h3>
-<h3>診断結果: <button type=“button” onclick="location.href='{{url_for('index')}}'">訂正・フィードバック</button><button type=“button” onclick="location.href='{{url_for('index')}}'">データベースへ移動</button></h3>
-<div>
-  <img src="{{ img_path }}" style="width: 800px;">
-</div>
+<br>
+
+<script>
+  var imgA = new Array();
+
+  imgA[0] = new Image();
+  imgA[0].src = "{{ anno_path }}"
+  imgA[1] = new Image();
+  imgA[1].src = "{{ img_path }}"
+  
+  var cnt=0;
+
+  function changeIMG(){
+    if (cnt == 1)
+    { cnt=0;}
+    else
+    { cnt++;}
+
+    document.getElementById("img_array").src=imgA[cnt].src;
+  }
+</script>
 
 
 {% endblock %}

@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<br><br>
+<h3>訂正画面</h3>
+<h3>肺炎を一箇所ずつアノテーションしてください(複数登録できます)<br>
+    <button type=“button” onclick="sendInfo()">アノテーション登録</button>
+    <button type=“button” onclick="location.href='{{url_for('done')}}'">終了・キャンセル</button>
+</h3>
+<div id="XandY">
+    <p id="output_lefttop"></p>
+    <p id="output_righttop"></p>
+</div>
+
+
+<img id="img_source" style="display:none;margin: auto;" src="{{ img_path }}" width="800px">
+<p></p>  
+<canvas id="SrcCanvas" onmousedown="OnMousedown(event);" onmousemove="OnMousemove(event);" onmouseup="OnMouseup(event);" width="252" height="220" ></canvas>
+<p></p>
+
+<br>
+
+<script>
+    //出力先
+    const output_lefttop = document.querySelector('#output_lefttop');
+    const output_righttop = document.querySelector('#output_righttop');
+
+    // キャンバス
+    var src_canvas; 
+    var src_ctx;
+    
+    // イメージ
+    var image;
+    
+    // 矩形用
+    var rect_MousedownFlg = false;
+    var rect_fx = 0;
+    var rect_fy = 0;
+    var rect_ex = 0;
+    var rect_ey = 0;
+    
+    window.onload = function () {
+      
+      src_canvas = document.getElementById("SrcCanvas");
+      src_ctx = src_canvas.getContext("2d");    
+      
+      image = document.getElementById("img_source");  
+    
+      src_canvas.width  = image.width;
+      src_canvas.height = image.height;
+            
+      // キャンバスに画像を描画
+      src_ctx.drawImage(image,0,0); 
+    
+    }
+    
+    // 色の反転
+    function getTurningAround(color) {
+    
+     // 灰色は白にする 
+     if(color >= 88 && color <= 168){
+       return 255;
+     // 色を反転する  
+     }else{
+       return 255 - color;
+     }
+    }
+    
+    function OnMousedown(event) {
+    
+      rect_MousedownFlg = true;
+      
+      // 座標を求める
+      var rect = event.target.getBoundingClientRect();
+      rect_fx = event.clientX - rect.left;
+      rect_fy = event.clientY - rect.top; 
+      output_lefttop.innerHTML = `x:` + rect_fx + ` y:` + rect_fy;
+      
+      // 矩形の枠色を反転させる  
+      var imagedata = src_ctx.getImageData(rect_fx, rect_fy, 1, 1);   
+      src_ctx.strokeStyle = 'rgb(' + getTurningAround(imagedata.data[0]) +
+                               ',' + getTurningAround(imagedata.data[1]) + 
+                               ',' + getTurningAround(imagedata.data[2]) + ')';  
+      // 線の太さ                         
+      src_ctx.lineWidth = 2; 
+      
+      // 矩形の枠線を点線にする
+      src_ctx.setLineDash([2, 3]);                             
+    }
+    
+    function OnMousemove(event) {
+      
+      if(rect_MousedownFlg){
+        
+        // 座標を求める
+        var rect = event.target.getBoundingClientRect();
+        rect_ex = event.clientX - rect.left;
+        rect_ey = event.clientY - rect.top; 
+    
+        // 元画像の再描画
+        src_ctx.drawImage(image,0,0);  
+        
+        // 矩形の描画
+        src_ctx.beginPath();
+    
+          // 上
+          src_ctx.moveTo(rect_fx,rect_fy);
+          src_ctx.lineTo(rect_ex,rect_fy);
+    
+          // 下
+          src_ctx.moveTo(rect_fx,rect_ey);
+          src_ctx.lineTo(rect_ex,rect_ey);
+    
+          // 右
+          src_ctx.moveTo(rect_ex,rect_fy);
+          src_ctx.lineTo(rect_ex,rect_ey);
+    
+          // 左
+          src_ctx.moveTo(rect_fx,rect_fy);
+          src_ctx.lineTo(rect_fx,rect_ey);
+    
+        src_ctx.stroke();
+      }
+    }
+    
+    function OnMouseup(event) {
+      output_righttop.innerHTML = `x:` + rect_ex + ` y:` + rect_ey;
+      rect_MousedownFlg = false;
+    }
+    
+    
+    function onDragOver(event){ 
+      event.preventDefault(); 
+    } 
+      
+    function onDrop(event){
+      onAddFile(event);
+      event.preventDefault(); 
+    }  
+    
+    // ユーザーによりファイルが追加された  
+    function onAddFile(event) {
+      var files;
+      var reader = new FileReader();
+      
+      if(event.target.files){
+        files = event.target.files;
+      }else{ 
+        files = event.dataTransfer.files;   
+      }    
+    
+      // ファイルが読み込まれた
+      reader.onload = function (event) {
+        
+        // イメージが読み込まれた
+        image.onload = function (){
+          src_canvas.width  = image.width;
+          src_canvas.height = image.height;
+            
+          // キャンバスに画像を描画
+          src_ctx.drawImage(image,0,0); 
+        };      
+           
+        // イメージが読み込めない
+        image.onerror  = function (){
+          alert('このファイルは読み込めません。');  
+        };
+    
+        image.src = reader.result;       
+      };
+      
+      if (files[0]){    
+        reader.readAsDataURL(files[0]); 
+        document.getElementById("inputfile").value = '';
+      } 
+    }         
+
+    function sendInfo(){
+      let info = {
+        "pX": rect_fx,
+        "pY": rect_fy,
+        "qX": rect_ex,
+        "qY": rect_ey,
+      }
+      const request = new XMLHttpRequest()
+      const info_json = JSON.stringify(info)
+      const info_url = '/processInfo/' + info_json
+      request.open("POST", info_url)
+      request.onload = () => {
+        const flaskMessage = request.responseText
+        console.log(flaskMessage)
+      }
+      request.send()
+  }
+
+
+    </script>
+    
+
+{% endblock %}

@@ -5,4 +5,30 @@
 
 <h3>結果一覧</h3>
 
+
+
+
+<table class="design03">
+    <tr>
+        <td>登録日時</td>
+        <td>タイトル</td>
+        <td>メモ</td>
+        <td>DICOM</td>
+        <td>JPG</td>
+        <td>診断</td>
+        <td>訂正</td>
+    </tr>
+    {% for i in range(num) %}
+    <tr>
+        <td>{{ dates[i] }}</td>
+        <td>{{ titles[i] }}</td>
+        <td>{{ memos[i] }}</td>
+        <td><a href="/static/dcms/{{ files[i] }}.dcm" download="{{titles[i]}}.dcm">DICOM画像</a></td>
+        <td><a href="/static/imgs/{{ files[i] }}.jpg">JPG画像</a></td>
+        <td><a href="/static/detect/{{ files[i] }}/{{ files[i] }}.jpg">診断画像</a></td>
+        <td>{{annotations[i]}}</td>
+    </tr>
+    {% endfor %}
+</table>
+
 {% endblock %}
